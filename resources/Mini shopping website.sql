@@ -15,7 +15,6 @@ create table userAccount
 	id int identity(1,1) primary key,
 	first_name varchar(50) not null,
 	last_name varchar(50),
-	username varchar(50) not null,
 	email varchar(50) not null,
 	password varchar(200) not null,
 	isManager bit not null default 0
