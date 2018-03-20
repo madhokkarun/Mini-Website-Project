@@ -78,7 +78,6 @@ public class WebsiteDAO {
 			userAccount.setId(rs.getInt(index++));
 			userAccount.setFirstName(rs.getString(index++));
 			userAccount.setLastName(rs.getString(index++));
-			userAccount.setUserName(rs.getString(index++));
 			userAccount.setEmail(rs.getString(index++));
 			userAccount.setPassword(rs.getString(index++));
 			userAccount.setIsManager(rs.getBoolean(index++));
@@ -191,6 +190,85 @@ public class WebsiteDAO {
 		conn.close();
 		
 		return String.valueOf(quantity);
+	}
+	
+	public static Boolean getUser(String email) throws SQLException
+	{
+		Connection conn = SqlServerConnection.getConnection();
+		
+		PreparedStatement ps = conn.prepareStatement(WebsiteConstants.SELECT_USER);
+		
+		int index = 1;
+		boolean isUserExists = false;
+		
+		ps.setString(index++, email);
+		
+		ResultSet rs = ps.executeQuery();
+		
+		if(rs.next())
+			isUserExists = true;
+		
+		conn.close();
+		
+		return isUserExists;
+	}
+	
+	public static Boolean insertUser(UserAccount userAccount) throws SQLException
+	{
+		Connection conn = SqlServerConnection.getConnection();
+		
+		PreparedStatement ps = conn.prepareStatement(WebsiteConstants.INSERT_USER_ACCOUNT);
+		
+		int index = 1;
+		
+		ps.setString(index++, userAccount.getFirstName());
+		ps.setString(index++, userAccount.getLastName());
+		ps.setString(index++, userAccount.getEmail());
+		ps.setString(index++, userAccount.getPassword());
+		ps.setBoolean(index++, userAccount.getIsManager());
+		
+		int rowAffected = ps.executeUpdate();
+		
+		conn.close();
+		
+		if(rowAffected > 0)
+			return true;
+		else
+			return false;
+	}
+	
+	public static UserAccount getUser(String email, String password, boolean isManager) throws SQLException
+	{
+		Connection conn = SqlServerConnection.getConnection();
+		
+		PreparedStatement ps = conn.prepareStatement(WebsiteConstants.SELECT_USER_EMAIL_PASSWORD);
+		
+		int index = 1;
+		
+		ps.setString(index++, email);
+		ps.setString(index++, password);
+		ps.setBoolean(index++, isManager);
+		
+		ResultSet rs = ps.executeQuery();
+		
+		UserAccount userAccount = new UserAccount();
+		
+		while(rs.next())
+		{
+			int i = 1;
+			
+			userAccount.setId(rs.getInt(i++));
+			userAccount.setFirstName(rs.getString(i++));
+			userAccount.setLastName(rs.getString(i++));
+			userAccount.setEmail(rs.getString(i++));
+			userAccount.setPassword(rs.getString(i++));
+			userAccount.setIsManager(rs.getBoolean(i++));
+		}
+		
+		conn.close();
+		
+		return userAccount;
+		
 	}
 
 }
