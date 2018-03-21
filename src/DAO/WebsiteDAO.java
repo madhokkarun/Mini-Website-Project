@@ -213,6 +213,36 @@ public class WebsiteDAO {
 		return isUserExists;
 	}
 	
+	public static UserAccount getUser(int id) throws SQLException
+	{
+		Connection conn = SqlServerConnection.getConnection();
+		
+		PreparedStatement ps = conn.prepareStatement(WebsiteConstants.SELECT_USER_ACCOUNT_ID);
+		
+		UserAccount userAccount = new UserAccount();
+		
+		int i = 1;
+		
+		ps.setInt(i++, id);
+		
+		ResultSet rs = ps.executeQuery();
+		
+		if(rs.next())
+		{
+			int index = 1;
+			userAccount.setId(rs.getInt(index++));
+			userAccount.setFirstName(rs.getString(index++));
+			userAccount.setLastName(rs.getString(index++));
+			userAccount.setEmail(rs.getString(index++));
+			userAccount.setPassword(rs.getString(index++));
+			userAccount.setIsManager(rs.getBoolean(index++));
+		}
+		
+		conn.close();
+		
+		return userAccount;
+	}
+	
 	public static Boolean insertUser(UserAccount userAccount) throws SQLException
 	{
 		Connection conn = SqlServerConnection.getConnection();
@@ -270,5 +300,29 @@ public class WebsiteDAO {
 		return userAccount;
 		
 	}
+	
+	public static Boolean updateUserPassword( Integer id, String newPassword, String oldPassword) throws SQLException
+	{
+		Connection conn = SqlServerConnection.getConnection();
+		
+		PreparedStatement ps = conn.prepareStatement(WebsiteConstants.UPDATE_PASSWORD);
+		
+		int index = 1;
+		
+		ps.setString(index++, newPassword);
+		ps.setInt(index++, id);
+		ps.setString(index++, oldPassword);
+		
+		int rowAffected = ps.executeUpdate();
+		
+		conn.close();
+		
+		if(rowAffected == 1)
+			return true;
+		else
+			return false;
+		
+	}
+	
 
 }

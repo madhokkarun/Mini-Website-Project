@@ -38,6 +38,7 @@ public class WebsiteController extends HttpServlet {
 		Boolean isLogIn = Boolean.valueOf(request.getParameter("isLogIn"));
 		Boolean isUser = Boolean.valueOf(request.getParameter("isUser"));
 		Boolean isLogOut = Boolean.valueOf(request.getParameter("isLogOut"));
+		Boolean isChangePassword = Boolean.valueOf(request.getParameter("isChangePassword"));
 		
 		if(isSignUp == true)
 		{
@@ -59,6 +60,16 @@ public class WebsiteController extends HttpServlet {
 		}
 		else if(isLogOut == true)
 			handleLogOut(request, response);
+		else if(isChangePassword == true)
+		{
+			try {
+				handlePasswordChange(request, response);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+			
 		
 	}
 
@@ -124,8 +135,42 @@ public class WebsiteController extends HttpServlet {
 		request.getSession().removeAttribute("isSignUpSuccessful");
 		request.getSession().removeAttribute("userAccount");
 		request.getSession().removeAttribute("isCredentialsValid");
+		request.getSession().removeAttribute("isPasswordChangeSuccessful");
 		
 		response.sendRedirect("/inventory");
+	}
+	
+	protected void handlePasswordChange(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException
+	{
+		UserAccount userAccount = (UserAccount) request.getSession().getAttribute("userAccount");
+		
+		Boolean isManager = userAccount.getIsManager();
+		Integer id = userAccount.getId();
+		String email = userAccount.getEmail();
+		
+		String oldPassword = "";
+		String newPassword = "";
+		
+		if(isManager)
+		{
+			oldPassword = request.getParameter("managerOldPassword");
+			newPassword = request.getParameter("managerNewPassword");
+		}
+		else
+		{
+			oldPassword = request.getParameter("userOldPassword");
+			newPassword = request.getParameter("userNewPassword");
+		}
+		
+		Boolean isPasswordChangeSuccessful = WebsiteDAO.updateUserPassword(id, newPassword, oldPassword);
+		
+		if(isPasswordChangeSuccessful)
+		{
+			request.getSession().setAttribute("isPasswordChangeSuccessful", isPasswordChangeSuccessful);
+			request.getSession().setAttribute("userAccount", WebsiteDAO.getUser(id));
+			
+			response.sendRedirect("/inventory");
+		}
 	}
 	
 }
