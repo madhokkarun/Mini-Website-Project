@@ -80,8 +80,8 @@
 						<button class="btn btn-primary dropdown-toggle" id="managerDropdownButton" type="button" data-toggle="dropdown">Manager
 						<span class="caret"></span></button>
 						<ul class="dropdown-menu">
-							<li><a id="managerLogInButton" data-toggle="modal" data-target="#logInDialog">Log In</a></li>
-							<li><a id="managerSignUpButton" data-toggle="modal" data-target="#signUpDialog">Sign Up</a></li>
+							<li><a id="managerLogInButton" class="pointerClickable" data-toggle="modal" data-target="#logInDialog">Log In</a></li>
+							<li><a id="managerSignUpButton" class="pointerClickable" data-toggle="modal" data-target="#signUpDialog">Sign Up</a></li>
 						</ul>
 					</div>
 					<button class="btn" id="logInButton" data-toggle="modal" data-target="#logInDialog">Log In</button>

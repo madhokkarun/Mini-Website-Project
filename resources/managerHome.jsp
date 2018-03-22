@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
-<%@ page import="model.*, DAO.*, java.lang.String" %>
+<%@ page import="model.*, DAO.*, java.lang.String, java.util.Date, java.text.SimpleDateFormat" %>
 <!DOCTYPE html>
 <html>
 	<head>
@@ -8,6 +8,7 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 		
 		<link href="css/responsive-utilities.css" rel="stylesheet">
+		<link href="css/home.css" rel="stylesheet">
 		
 		<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" >
 		<link href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css" rel="stylesheet" >
@@ -67,8 +68,8 @@
 						<button class="btn btn-primary dropdown-toggle" id="managerDropdownButton" type="button" data-toggle="dropdown">Manager
 						<span class="caret"></span></button>
 						<ul class="dropdown-menu">
-							<li><a id="myOrdersButton">Manage Orders</a></li>
-							<li><a id="changePasswordButton" data-toggle="modal" data-target="#managerChangePasswordDialog">Change Password</a></li>
+							<li><a id="myOrdersButton" class="pointerClickable">Manage Orders</a></li>
+							<li><a id="changePasswordButton" class="pointerClickable" data-toggle="modal" data-target="#managerChangePasswordDialog">Change Password</a></li>
 						</ul>
 					</div>
 					<form class="display-sm-up-inline-block" action="WebsiteController" method="POST">
@@ -78,14 +79,16 @@
 				</div>
 			</div>
 			<div class="row inventory-page-content padding-top-sm-up-20">
-				<div class="col-sm-8 col-md-6 col-lg-6 col-sm-offset-2 col-md-offset-3 col-lg-offset-3">
-					<table id="itemTable" class="table item-table">
+				<div class="col-sm-10 col-md-8 col-lg-8 col-sm-offset-1 col-md-offset-2 col-lg-offset-2">
+					<table id="managerItemTable" class="table item-table">
 						<thead>
 							<tr>
 								<th>Item code</th>
 								<th>Name</th>
 								<th>Price</th>
 								<th>Quantity</th>
+								<th></th>
+								<th></th>
 							</tr>
 						</thead>
 						<tbody>
@@ -100,6 +103,8 @@
 										<td><%=item.getName() %></td>
 										<td><%=formattedPrice %></td>
 										<td><%=quantity %></td>
+										<td class="text-align-sm-up-right"><a class="pointerClickable" id="itemEditButton" data-item-id="<%=item.getId()%>"><span class="glyphicon glyphicon-pencil"></span></a></td>
+										<td class="text-align-sm-up-right"><a class="pointerClickable" id="itemDeleteButton" data-item-id="<%=item.getId()%>"><span class="glyphicon glyphicon-trash"></span></button></td>
 									</tr>
 								<%}%>
 						</tbody>

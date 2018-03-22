@@ -8,12 +8,11 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 		
 		<link href="css/responsive-utilities.css" rel="stylesheet">
+		<link href="css/home.css" rel="stylesheet">
 		
 		<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" >
 		<link href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css" rel="stylesheet" >
 		<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/dataTables.bootstrap.min.css">
-		
-		
 		
 		<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
@@ -67,8 +66,8 @@
 						<button class="btn btn-primary dropdown-toggle" id="managerDropdownButton" type="button" data-toggle="dropdown">User
 						<span class="caret"></span></button>
 						<ul class="dropdown-menu">
-							<li><a id="myOrdersButton">My Orders</a></li>
-							<li><a id="changePasswordButton" data-toggle="modal" data-target="#userChangePasswordDialog">Change Password</a></li>
+							<li><a id="myOrdersButton" class="pointerClickable">My Orders</a></li>
+							<li><a id="changePasswordButton" class="pointerClickable" data-toggle="modal" data-target="#userChangePasswordDialog">Change Password</a></li>
 						</ul>
 					</div>
 					<form class="display-sm-up-inline-block" action="WebsiteController" method="POST">
@@ -78,8 +77,8 @@
 				</div>
 			</div>
 			<div class="row inventory-page-content padding-top-sm-up-20">
-				<div class="col-sm-8 col-md-6 col-lg-6 col-sm-offset-2 col-md-offset-3 col-lg-offset-3">
-					<table id="itemTable" class="table item-table">
+				<div class="col-sm-10 col-md-8 col-lg-8 col-sm-offset-1 col-md-offset-2 col-lg-offset-2">
+					<table id="userItemTable" class="table item-table">
 						<thead>
 							<tr>
 								<th>Item code</th>
@@ -101,7 +100,7 @@
 										<td><%=item.getName() %></td>
 										<td><%=formattedPrice %></td>
 										<td><%=quantity %></td>
-										<td><button class="btn btn-primary" data-item-id="<%=item.getId()%>" id="orderButton<%=item.getId()%>">Order</button></td>
+										<td class="text-align-sm-up-right"><button class="btn btn-primary" data-item-id="<%=item.getId()%>" id="orderButton<%=item.getId()%>" <%if(Integer.valueOf(quantity) <= 0){%>disabled<%} %>>Order</button></td>
 									</tr>
 								<%}%>
 						</tbody>

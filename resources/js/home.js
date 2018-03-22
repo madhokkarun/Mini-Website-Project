@@ -1,6 +1,18 @@
 $(document).ready(function(){
 	$('#itemTable').DataTable();
 	
+	$('#userItemTable').DataTable({
+		"columnDefs": [
+		    { "orderable": false, "targets": -1 }
+		  ]
+	});
+	
+	$('#managerItemTable').DataTable({
+		"columnDefs": [
+		    { "orderable": false, "targets": [-1, -2] }
+		  ]
+	});
+	
 	$('#managerLogInButton').click(function(){
 		$('#logInForm').find('#isUser').val("false");
 	});

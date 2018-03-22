@@ -4,3 +4,8 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+.pointerClickable
+{
+	cursor: pointer;
+}
