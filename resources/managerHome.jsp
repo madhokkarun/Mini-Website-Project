@@ -26,22 +26,10 @@
 		
 	</head>
 	<body>
+		<script type="text/javascript"> var oldSessionPassword = "";</script>
 		<%
 		UserAccount userAccount = (UserAccount) request.getSession().getAttribute("userAccount");
 		String userFullName = "";
-		
-		if(userAccount != null)
-		{
-			if(!userAccount.getIsManager())
-			{
-				request.getSession().removeAttribute("userAccount");
-				response.sendRedirect("/inventory");
-			}
-			
-			userFullName = " " + userAccount.getFirstName() + " " + userAccount.getLastName();
-		}
-		else
-			response.sendRedirect("/inventory");
 		
 		if(request.getSession().getAttribute("isPasswordChangeSuccessful") != null)
 		{
@@ -54,7 +42,26 @@
 			<%}
 			
 			request.getSession().removeAttribute("isPasswordChangeSuccessful");
+			
+			%>
+			<script>oldSessionPassword = "";</script>
+			<%
 		}
+		
+		if(userAccount != null)
+		{
+			if(!userAccount.getIsManager())
+			{
+				request.getSession().removeAttribute("userAccount");
+				response.sendRedirect("/inventory");
+			}
+			
+			userFullName = " " + userAccount.getFirstName() + " " + userAccount.getLastName();
+			
+			%><script type="text/javascript"> oldSessionPassword = "<%=userAccount.getPassword()%>"</script>
+		<%}
+		else
+			response.sendRedirect("/inventory");
 		
 		%>
 		<script> var oldSessionPassword = "<%=userAccount.getPassword()%>"</script>

@@ -24,24 +24,12 @@
 		
 	</head>
 	<body>
+		<script type="text/javascript"> var oldSessionPassword = "";</script>
+		
 		<%
-			
 			UserAccount userAccount = (UserAccount) request.getSession().getAttribute("userAccount");
 			String userFullName = "";			
 
-			if(userAccount != null)
-			{
-				if(userAccount.getIsManager())
-				{
-					request.getSession().removeAttribute("userAccount");
-					response.sendRedirect("/inventory");
-				}
-				
-				userFullName = " " + userAccount.getFirstName() + " " + userAccount.getLastName();
-			}
-			else
-				response.sendRedirect("/inventory");
-			
 			if(request.getSession().getAttribute("isPasswordChangeSuccessful") != null)
 			{
 				if(Boolean.valueOf(String.valueOf(request.getSession().getAttribute("isPasswordChangeSuccessful"))))
@@ -50,12 +38,33 @@
 						<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
 						<strong>Password changed successfully!</strong>
 					</div>
+					
 				<%}
 				
 				request.getSession().removeAttribute("isPasswordChangeSuccessful");
+				
+				%>
+					<script>oldSessionPassword = "";</script>
+				<%
+				
 			}
+			
+			if(userAccount != null)
+			{
+				if(userAccount.getIsManager())
+				{
+					request.getSession().removeAttribute("userAccount");
+					response.sendRedirect("/inventory");
+				}
+				
+				userFullName = " " + userAccount.getFirstName() + " " + userAccount.getLastName();%>
+				
+				<script type="text/javascript"> oldSessionPassword = "<%=userAccount.getPassword()%>"</script>
+			<%}
+			else
+				response.sendRedirect("/inventory");
+			
 		%>
-		<script> var oldSessionPassword = "<%=userAccount.getPassword()%>"</script>
 		<div class="container-fluid">
 			<div class="row inventory-page-header" style="border-bottom: 1px solid grey">
 				<div class="col-sm-6 col-md-6 col-lg-6 inventory-page-header-title">
@@ -100,7 +109,7 @@
 										<td><%=item.getName() %></td>
 										<td><%=formattedPrice %></td>
 										<td><%=quantity %></td>
-										<td class="text-align-sm-up-right"><button class="btn btn-primary" data-item-id="<%=item.getId()%>" id="orderButton<%=item.getId()%>" <%if(Integer.valueOf(quantity) <= 0){%>disabled<%} %>>Order</button></td>
+										<td class="text-align-sm-up-right"><button id="orderButton<%=item.getId()%>" class="btn btn-primary item-order-button" data-item-id="<%=item.getId()%>" data-item-max-quantity="<%=quantity%>" <%if(Integer.valueOf(quantity) <= 0){%>disabled<%} %> data-toggle="modal" data-target="#itemOrderDialog">Order</button></td>
 									</tr>
 								<%}%>
 						</tbody>
@@ -127,6 +136,33 @@
 								<input type="hidden" name="isChangePassword" value="true">
 								<div class="form-group">
 									<input type="submit" class="btn btn-info" value="Change">
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="itemOrderDialog" class="modal fade" role="dialog">
+				<div class="modal-dialog modal-sm">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal">&times;</button>
+							<h4 class="modal-title">Order Item</h4>
+						</div>
+						<div class="modal-body">
+							<form id="itemOrderForm">
+								<div class="form-group input-group">
+									<span class="input-group-addon"><i class="glyphicon glyphicon-plus"></i></span>
+									<input type="number" name="itemOrderQuantity" id="itemOrderQuantity" class="form-control" placeholder="Quantity" min="1" required>
+								</div>
+								<div class="form-group input-group">
+									<span class="input-group-addon"><i class="glyphicon glyphicon-home"></i></span>
+									<input type="text" name="itemOrderDeliveryAddress" id="itemOrderDeliveryAddress" class="form-control" placeholder="Delivery address" required>
+								</div>
+								<input type="hidden" name="isItemOrder" value="true">
+								<input type="hidden" id="itemOrderId" name="itemOrderId"> 
+								<div class="form-group">
+									<input type="submit" class="btn btn-info" value="Order">
 								</div>
 							</form>
 						</div>

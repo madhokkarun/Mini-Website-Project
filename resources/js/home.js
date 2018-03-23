@@ -1,4 +1,5 @@
 $(document).ready(function(){
+	
 	$('#itemTable').DataTable();
 	
 	$('#userItemTable').DataTable({
@@ -12,6 +13,8 @@ $(document).ready(function(){
 		    { "orderable": false, "targets": [-1, -2] }
 		  ]
 	});
+	
+	
 	
 	$('#managerLogInButton').click(function(){
 		$('#logInForm').find('#isUser').val("false");
@@ -28,6 +31,19 @@ $(document).ready(function(){
 	$('#signUpButton').click(function(){
 		$('#signUpForm').find('#isUser').val("true");
 	});
+	
+	
+	
+	
+	$('.item-order-button').click(function(){
+		var itemId = $(this).attr('data-item-id');
+		var maxQuantity = $(this).attr('data-item-max-quantity');
+		
+		$('#itemOrderQuantity').attr('max', maxQuantity);
+		$('#itemOrderId').val(itemId);
+	});
+	
+	
 	
 	
 	$('#userChangePasswordForm').submit(function(event){
