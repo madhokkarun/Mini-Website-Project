@@ -5,15 +5,26 @@ $(document).ready(function(){
 	$('#userItemTable').DataTable({
 		"columnDefs": [
 		    { "orderable": false, "targets": -1 }
-		  ]
+		  ],
+		"language": {
+		    "emptyTable": "No items in inventory"}
 	});
 	
 	$('#managerItemTable').DataTable({
 		"columnDefs": [
 		    { "orderable": false, "targets": [-1, -2] }
-		  ]
+		  ],
+		"language": {
+		    "emptyTable": "No items in inventory"}
 	});
 	
+	$('#userMyOrdersTable').DataTable({
+		"columnDefs": [
+		    { "orderable": false, "targets": -1 }
+		  ],
+		"language": {
+		    "emptyTable": "Currently you don't have any orders"}
+	});
 	
 	
 	$('#managerLogInButton').click(function(){
@@ -41,8 +52,19 @@ $(document).ready(function(){
 		
 		$('#itemOrderQuantity').attr('max', maxQuantity);
 		$('#itemOrderId').val(itemId);
+		$('#availableItemQuantity').val(maxQuantity);
 	});
 	
+	
+	$('.item-order-cancel-button').click(function(){debugger;
+		var orderId = $(this).attr('data-item-order-id');
+		var itemId = $(this).attr('data-item-id');
+		var itemQuantityUpdatedValue = $(this).attr('data-item-quantity-update');
+
+		$('#cancelOrderId').val(orderId);
+		$('#cancelItemId').val(itemId);
+		$('#updatedItemQuantity').val(itemQuantityUpdatedValue);
+	});
 	
 	
 	

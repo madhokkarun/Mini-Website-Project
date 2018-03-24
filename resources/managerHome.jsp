@@ -64,7 +64,6 @@
 			response.sendRedirect("/inventory");
 		
 		%>
-		<script> var oldSessionPassword = "<%=userAccount.getPassword()%>"</script>
 		<div class="container-fluid">
 			<div class="row inventory-page-header" style="border-bottom: 1px solid grey">
 				<div class="col-sm-6 col-md-6 col-lg-6 inventory-page-header-title">
@@ -100,7 +99,8 @@
 						</thead>
 						<tbody>
 						
-							<%for(Item item: WebsiteDAO.getItems())
+							<%if(WebsiteDAO.getItems() != null)
+							{for(Item item: WebsiteDAO.getItems())
 								{ %>
 									<tr>
 										<% String formattedPrice = "$" + String.format("%,.2f", item.getPrice());
@@ -113,7 +113,7 @@
 										<td class="text-align-sm-up-right"><a class="pointerClickable" id="itemEditButton" data-item-id="<%=item.getId()%>"><span class="glyphicon glyphicon-pencil"></span></a></td>
 										<td class="text-align-sm-up-right"><a class="pointerClickable" id="itemDeleteButton" data-item-id="<%=item.getId()%>"><span class="glyphicon glyphicon-trash"></span></button></td>
 									</tr>
-								<%}%>
+								<%}}%>
 						</tbody>
 					</table>
 				</div>

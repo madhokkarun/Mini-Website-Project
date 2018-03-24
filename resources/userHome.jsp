@@ -30,31 +30,81 @@
 			UserAccount userAccount = (UserAccount) request.getSession().getAttribute("userAccount");
 			String userFullName = "";			
 
-			if(request.getSession().getAttribute("isPasswordChangeSuccessful") != null)
-			{
-				if(Boolean.valueOf(String.valueOf(request.getSession().getAttribute("isPasswordChangeSuccessful"))))
-				{%>
-					<div class="alert alert-success alert-dismissible">
-						<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-						<strong>Password changed successfully!</strong>
-					</div>
-					
-				<%}
-				
-				request.getSession().removeAttribute("isPasswordChangeSuccessful");
-				
-				%>
-					<script>oldSessionPassword = "";</script>
-				<%
-				
-			}
-			
 			if(userAccount != null)
 			{
 				if(userAccount.getIsManager())
 				{
 					request.getSession().removeAttribute("userAccount");
 					response.sendRedirect("/inventory");
+				}
+				
+				if(request.getSession().getAttribute("isPasswordChangeSuccessful") != null)
+				{
+					if(Boolean.valueOf(String.valueOf(request.getSession().getAttribute("isPasswordChangeSuccessful"))))
+					{%>
+						<div class="alert alert-success alert-dismissible">
+							<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+							<strong>Password changed successfully!</strong>
+						</div>
+						
+					<%}
+					
+					request.getSession().removeAttribute("isPasswordChangeSuccessful");
+					
+					%>
+						<script>oldSessionPassword = "";</script>
+					<%
+					
+				}
+				
+				if(request.getSession().getAttribute("isOrderSuccessful") != null)
+				{
+					if(Boolean.valueOf(String.valueOf(request.getSession().getAttribute("isOrderSuccessful"))))
+					{
+						%>
+						<div class="alert alert-success alert-dismissible">
+							<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+							<strong>Order Successful! </strong>Open My Orders to check your order status.
+						</div>
+						
+					<%
+					}
+					else
+					{
+						%>
+						<div class="alert alert-danger alert-dismissible">
+							<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+							<strong>Order Unsuccessful! </strong>Something went wrong, try again later.
+						</div>
+						
+					<%
+					}
+					request.getSession().removeAttribute("isOrderSuccessful");
+				}
+				
+				if(request.getSession().getAttribute("isOrderCancelSuccessful") != null)
+				{
+					if(Boolean.valueOf(String.valueOf(request.getSession().getAttribute("isOrderCancelSuccessful"))))
+					{
+						%>
+						<div class="alert alert-success alert-dismissible">
+							<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+							<strong>Order cancelled successfully! </strong>
+						</div>
+						
+					<%
+					}
+					else
+					{
+						%>
+						<div class="alert alert-danger alert-dismissible">
+							<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+							<strong>Order couldn't be canceled!</strong>Something went wrong, try again later.
+						</div>
+						
+					<%
+					}
+					request.getSession().removeAttribute("isOrderCancelSuccessful");
 				}
 				
 				userFullName = " " + userAccount.getFirstName() + " " + userAccount.getLastName();%>
@@ -75,7 +125,7 @@
 						<button class="btn btn-primary dropdown-toggle" id="managerDropdownButton" type="button" data-toggle="dropdown">User
 						<span class="caret"></span></button>
 						<ul class="dropdown-menu">
-							<li><a id="myOrdersButton" class="pointerClickable">My Orders</a></li>
+							<li><a id="myOrdersButton" class="pointerClickable" data-toggle="modal" data-target="#userMyOrdersDialog">My Orders</a></li>
 							<li><a id="changePasswordButton" class="pointerClickable" data-toggle="modal" data-target="#userChangePasswordDialog">Change Password</a></li>
 						</ul>
 					</div>
@@ -99,7 +149,8 @@
 						</thead>
 						<tbody>
 						
-							<%for(Item item: WebsiteDAO.getItems())
+							<%if(WebsiteDAO.getItems() != null)
+							{for(Item item: WebsiteDAO.getItems())
 								{ %>
 									<tr>
 										<% String formattedPrice = "$" + String.format("%,.2f", item.getPrice());
@@ -111,7 +162,7 @@
 										<td><%=quantity %></td>
 										<td class="text-align-sm-up-right"><button id="orderButton<%=item.getId()%>" class="btn btn-primary item-order-button" data-item-id="<%=item.getId()%>" data-item-max-quantity="<%=quantity%>" <%if(Integer.valueOf(quantity) <= 0){%>disabled<%} %> data-toggle="modal" data-target="#itemOrderDialog">Order</button></td>
 									</tr>
-								<%}%>
+								<%}}%>
 						</tbody>
 					</table>
 				</div>
@@ -150,7 +201,7 @@
 							<h4 class="modal-title">Order Item</h4>
 						</div>
 						<div class="modal-body">
-							<form id="itemOrderForm">
+							<form id="itemOrderForm" method="POST" action="ItemController">
 								<div class="form-group input-group">
 									<span class="input-group-addon"><i class="glyphicon glyphicon-plus"></i></span>
 									<input type="number" name="itemOrderQuantity" id="itemOrderQuantity" class="form-control" placeholder="Quantity" min="1" required>
@@ -161,9 +212,91 @@
 								</div>
 								<input type="hidden" name="isItemOrder" value="true">
 								<input type="hidden" id="itemOrderId" name="itemOrderId"> 
+								<input type="hidden" id="availableItemQuantity" name="availableItemQuantity">
 								<div class="form-group">
 									<input type="submit" class="btn btn-info" value="Order">
 								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<div id="userMyOrdersDialog" class="modal fade" role="dialog">
+				<div class="modal-dialog modal-lg">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal">&times;</button>
+							<h4 class="modal-title">My Orders</h4>
+						</div>
+						<div class="modal-body">
+							<table id="userMyOrdersTable" class="table user-my-orders-table">
+								<thead>
+									<tr>
+										<th>Order No</th>
+										<th>Name</th>
+										<th>Price</th>
+										<th>Quantity</th>
+										<th>Total</th>
+										<th>Is Processed?</th>
+										<th></th>
+									</tr>
+								</thead>
+								<tbody>
+								
+									<%if(userAccount != null)
+										{
+										for(ItemOrder itemOrder: WebsiteDAO.getItemOrdersByUser(userAccount.getId()))
+										{ %>
+											<tr>
+												<% Item item = WebsiteDAO.getItem(itemOrder.getItem());
+												
+													String formattedPrice = "$" + String.format("%,.2f", item.getPrice());
+													Integer quantityOrdered = itemOrder.getQuantity();
+													
+													Double total = Double.valueOf(item.getPrice()) * quantityOrdered;
+													String formattedTotal = "$" + String.format("%,.2f", total);
+													
+													Integer availableItemQuantity = Integer.valueOf(WebsiteDAO.getItemQuantity(item.getId()));
+													
+												%>
+												<td><%=itemOrder.getId() %></td>
+												<td><%=item.getName() %></td>
+												<td><%=formattedPrice %></td>
+												<td><%=quantityOrdered %></td>
+												<td><%= formattedTotal%></td>
+												<td><%if(itemOrder.getIsProcessed()){%>Yes<%}else{%>No<%} %></td>
+												<td class="text-align-sm-up-right"><button id="cancelOrderButton<%=itemOrder.getId()%>" class="btn btn-primary item-order-cancel-button" data-item-id = "<%=item.getId()%>" data-item-quantity-update = "<%=(availableItemQuantity + quantityOrdered)%>" data-item-order-id="<%=itemOrder.getId()%>" <%if(itemOrder.getIsProcessed()){%>disabled<%} %> data-toggle="modal" data-target="#orderCancelConfirmation">Cancel Order</button></td>
+											</tr>
+										<%}}%>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="orderCancelConfirmation" class="modal fade" role="dialog">
+				<div class="modal-dialog modal-sm">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal">&times;</button>
+							<h4 class="modal-title">Cancel Order</h4>
+						</div>
+						<div class="modal-body">
+							<form id="orderCancelForm" method="POST" action="ItemController">
+								<div class="form-group">
+									<span>Are you sure you want to cancel your order?</label>
+								</div>
+								<div class="form-group display-sm-up-inline-block">
+									<input type="submit" class="btn" value="Yes">
+								</div>
+								<div class="form-group display-sm-up-inline-block">
+									<button class="btn btn-info" data-dismiss="modal">No</button>
+								</div>
+								<input type="hidden" name="isCancelOrder" value="true">
+								<input type="hidden" id="cancelOrderId" name="cancelOrderId"> 
+								<input type="hidden" id="cancelItemId" name="cancelItemId">
+								<input type="hidden" id="updatedItemQuantity" name="updatedItemQuantity">
 							</form>
 						</div>
 					</div>

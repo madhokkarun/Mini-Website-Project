@@ -91,17 +91,21 @@ public class WebsiteDAO {
 	}
 	
 	/**
-	 * Get all the Item order records from database
+	 * Get all the Item order records for a particular user from database
 	 * @return: returns list of all the records in form of ItemOrder object
 	 * @throws SQLException
 	 */
-	public static List<ItemOrder> getItemOrders() throws SQLException
+	public static List<ItemOrder> getItemOrdersByUser(Integer userId) throws SQLException
 	{
 		Connection conn = SqlServerConnection.getConnection();
 		
 		List<ItemOrder> itemOrderList = new ArrayList();
 		
-		PreparedStatement ps = conn.prepareStatement(WebsiteConstants.SELECT_ITEM_ORDER);
+		PreparedStatement ps = conn.prepareStatement(WebsiteConstants.SELECT_ITEM_ORDER_BY_USER);
+		
+		int i = 1;
+		
+		ps.setInt(i++, userId);
 		
 		ResultSet rs = ps.executeQuery();
 		
@@ -324,5 +328,97 @@ public class WebsiteDAO {
 		
 	}
 	
+	public static Boolean insertItemOrder(Integer userId, Integer itemId, Integer quantity, String deliveryAddress) throws SQLException
+	{
+		Connection conn = SqlServerConnection.getConnection();
+		
+		PreparedStatement ps = conn.prepareStatement(WebsiteConstants.INSERT_ITEM_ORDER);
+		
+		int index = 1;
+		
+		ps.setInt(index++, userId);
+		ps.setInt(index++, itemId);
+		ps.setInt(index++, quantity);
+		ps.setString(index++, deliveryAddress);
+		
+		int rowAffected = ps.executeUpdate();
+		
+		conn.close();
+		
+		if(rowAffected == 1)
+			return true;
+		else
+			return false;
+	}
+	
+	public static Boolean updateInventoryItemQuantity(Integer quantity, Integer itemId) throws SQLException
+	{
+		Connection conn = SqlServerConnection.getConnection();
+		
+		PreparedStatement ps = conn.prepareStatement(WebsiteConstants.UPDATE_INVENTORY_ITEM_QUANTITY);
+		
+		int index = 1;
+		
+		ps.setInt(index++, quantity);
+		ps.setInt(index++, itemId);
+		
+		int rowAffected = ps.executeUpdate();
+		
+		conn.close();
+		
+		if(rowAffected == 1)
+			return true;
+		else
+			return false;
+	}
+	
+	public static Item getItem(Integer itemId) throws SQLException
+	{
+		Connection conn = SqlServerConnection.getConnection();
+		
+		Item item  = new Item();
+		
+		PreparedStatement ps = conn.prepareStatement(WebsiteConstants.SELECT_ITEM_ID);
+		
+		int i = 1;
+		
+		ps.setInt(i++, itemId);
+		ResultSet rs = ps.executeQuery();
+		
+		while(rs.next())
+		{
+			int index = 1;
+			
+			item.setId(rs.getInt(index++));
+			item.setName(rs.getString(index++));
+			item.setPrice(rs.getDouble(index++));
+			item.setDateAdded(rs.getString(index++));
+			
+		}
+		
+		conn.close();
+		
+		return item;
+		
+	}
+	
+	public static Boolean deleteItemOrder(Integer orderId) throws SQLException
+	{
+		Connection conn = SqlServerConnection.getConnection();
+		
+		PreparedStatement ps = conn.prepareStatement(WebsiteConstants.DELETE_ITEM_ORDER);
+		
+		int index = 1;
+		
+		ps.setInt(index++, orderId);
+		
+		int rowAffected = ps.executeUpdate();
+		
+		if(rowAffected == 1)
+			return true;
+		else
+			return false;
+		
+	}
 
 }
