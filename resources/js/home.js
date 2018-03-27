@@ -20,7 +20,7 @@ $(document).ready(function(){
 	
 	$('#userMyOrdersTable').DataTable({
 		"columnDefs": [
-		    { "orderable": false, "targets": -1 }
+		    { "orderable": false, "targets": [-1, -2] }
 		  ],
 		"language": {
 		    "emptyTable": "Currently you don't have any orders"}
@@ -56,7 +56,7 @@ $(document).ready(function(){
 	});
 	
 	
-	$('.item-order-cancel-button').click(function(){debugger;
+	$('.item-order-cancel-button').click(function(){
 		var orderId = $(this).attr('data-item-order-id');
 		var itemId = $(this).attr('data-item-id');
 		var itemQuantityUpdatedValue = $(this).attr('data-item-quantity-update');
@@ -64,6 +64,17 @@ $(document).ready(function(){
 		$('#cancelOrderId').val(orderId);
 		$('#cancelItemId').val(itemId);
 		$('#updatedItemQuantity').val(itemQuantityUpdatedValue);
+	});
+	
+	$('.item-order-edit-button').click(function(){
+		var orderId = $(this).attr('data-item-order-id');
+		$('#itemUpdateOrderId').val(orderId);
+		
+		var address = $(this).parent().parent().find('.order-delivery-address').text();
+		var quantityOrdered = $(this).parent().parent().find('.quantity-ordered').text();
+		
+		$('#itemUpdateOrderQuantity').val(quantityOrdered);
+		$('#itemUpdateOrderDeliveryAddress').val(address);
 	});
 	
 	

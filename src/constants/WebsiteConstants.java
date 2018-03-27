@@ -21,4 +21,6 @@ public class WebsiteConstants {
 	public static final String UPDATE_INVENTORY_ITEM_QUANTITY = "UPDATE inventory SET quantity = ? WHERE item = ?";
 	
 	public static final String DELETE_ITEM_ORDER = "DELETE FROM itemOrder where id = ?";
+	public static final String UPDATE_ITEM_ORDER = "UPDATE itemOrder SET quantity = ?, deliveryAddress = ? WHERE id = ?";
+	public static final String SELECT_ITEM_ORDER_ID = "SELECT * FROM itemOrder where id = ?";
 }

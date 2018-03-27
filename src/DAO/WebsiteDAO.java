@@ -420,5 +420,63 @@ public class WebsiteDAO {
 			return false;
 		
 	}
+	
+	public static Boolean updateItemOrder(Integer id, Integer quantity, String deliveryAddress) throws SQLException
+	{
+		Connection conn = SqlServerConnection.getConnection();
+		
+		PreparedStatement ps = conn.prepareStatement(WebsiteConstants.UPDATE_ITEM_ORDER);
+		
+		int index = 1;
+		
+		ps.setInt(index++, quantity);
+		ps.setString(index++, deliveryAddress);
+		ps.setInt(index++, id);
+		
+		int rowAffected = ps.executeUpdate();
+		
+		conn.close();
+		
+		if(rowAffected == 1)
+			return true;
+		else
+			return false;
+		
+	}
+	
+	public static ItemOrder getItemOrder(Integer orderId) throws SQLException
+	{
+		Connection conn = SqlServerConnection.getConnection();
+		
+		ItemOrder itemOrder  = new ItemOrder();
+		
+		PreparedStatement ps = conn.prepareStatement(WebsiteConstants.SELECT_ITEM_ORDER_ID);
+		
+		int i = 1;
+		
+		ps.setInt(i++, orderId);
+		ResultSet rs = ps.executeQuery();
+		
+		while(rs.next())
+		{
+			int index = 1;
+			
+			itemOrder.setId(rs.getInt(index++));
+			itemOrder.setUserAccount(rs.getInt(index++));
+			itemOrder.setItem(rs.getInt(index++));
+			itemOrder.setQuantity(rs.getInt(index++));
+			itemOrder.setOrderDate(rs.getString(index++));
+			itemOrder.setDeliveryAddress(rs.getString(index++));
+			itemOrder.setIsProcessed(rs.getBoolean(index++));
+			
+		}
+		
+		conn.close();
+		
+		return itemOrder;
+		
+	}
+	
+	
 
 }

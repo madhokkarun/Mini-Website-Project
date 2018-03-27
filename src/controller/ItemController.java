@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import DAO.WebsiteDAO;
+import model.ItemOrder;
 import model.UserAccount;
 
 /**
@@ -34,6 +35,7 @@ public class ItemController extends HttpServlet {
 		
 		Boolean isItemOrder = Boolean.valueOf(request.getParameter("isItemOrder"));
 		Boolean isCancelOrder = Boolean.valueOf(request.getParameter("isCancelOrder"));
+		Boolean isUpdateOrder = Boolean.valueOf(request.getParameter("isUpdateOrder"));
 		
 		UserAccount userAccount =  (UserAccount) request.getSession().getAttribute("userAccount");
 		
@@ -52,6 +54,15 @@ public class ItemController extends HttpServlet {
 			
 			try {
 				handleOrderCancel(request, response, orderId);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		else if(isUpdateOrder)
+		{
+			try {
+				handleOrderUpdate(request, response);
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -105,6 +116,38 @@ public class ItemController extends HttpServlet {
 		
 		response.sendRedirect("/inventory/userHome.jsp");
 		
+	}
+	
+	protected void handleOrderUpdate(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException
+	{
+		Integer orderId = Integer.valueOf(request.getParameter("itemUpdateOrderId"));
+		
+		ItemOrder itemOrder = WebsiteDAO.getItemOrder(orderId);
+		
+		Integer itemId = itemOrder.getItem();
+		Integer availableQuantity = Integer.valueOf(WebsiteDAO.getItemQuantity(itemId));
+		Integer orderQuantity = itemOrder.getQuantity();
+		
+		Integer updatedOrderQuantity = Integer.valueOf(request.getParameter("itemUpdateOrderQuantity"));
+		String updatedDeliveryAddress = request.getParameter("itemUpdateOrderDeliveryAddress");
+		
+		Integer updatedItemQuantity = availableQuantity;
+		
+		if(updatedOrderQuantity > orderQuantity)
+			updatedItemQuantity = updatedItemQuantity - (updatedOrderQuantity - orderQuantity);
+		else
+			updatedItemQuantity = updatedItemQuantity + (orderQuantity - updatedOrderQuantity);
+		
+		Boolean isOrderUpdateSuccessful = WebsiteDAO.updateItemOrder(orderId, updatedOrderQuantity, updatedDeliveryAddress);
+		
+		Boolean isInventoryUpdateSuccessful = WebsiteDAO.updateInventoryItemQuantity(updatedItemQuantity, itemId);
+		
+		if(!isInventoryUpdateSuccessful)
+			isOrderUpdateSuccessful = false;
+		
+		request.getSession().setAttribute("isOrderUpdateSuccessful", isOrderUpdateSuccessful);
+		
+		response.sendRedirect("/inventory/userHome.jsp");
 		
 		
 	}

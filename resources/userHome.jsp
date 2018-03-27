@@ -107,6 +107,31 @@
 					request.getSession().removeAttribute("isOrderCancelSuccessful");
 				}
 				
+				if(request.getSession().getAttribute("isOrderUpdateSuccessful") != null)
+				{
+					if(Boolean.valueOf(String.valueOf(request.getSession().getAttribute("isOrderUpdateSuccessful"))))
+					{
+						%>
+						<div class="alert alert-success alert-dismissible">
+							<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+							<strong>Order Updated successfully! </strong>
+						</div>
+						
+					<%
+					}
+					else
+					{
+						%>
+						<div class="alert alert-danger alert-dismissible">
+							<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+							<strong>Order couldn't be updated!</strong>Something went wrong, try again later.
+						</div>
+						
+					<%
+					}
+					request.getSession().removeAttribute("isOrderUpdateSuccessful");
+				}
+				
 				userFullName = " " + userAccount.getFirstName() + " " + userAccount.getLastName();%>
 				
 				<script type="text/javascript"> oldSessionPassword = "<%=userAccount.getPassword()%>"</script>
@@ -237,8 +262,10 @@
 										<th>Name</th>
 										<th>Price</th>
 										<th>Quantity</th>
+										<th>Address</th>
 										<th>Total</th>
 										<th>Is Processed?</th>
+										<th></th>
 										<th></th>
 									</tr>
 								</thead>
@@ -263,10 +290,12 @@
 												<td><%=itemOrder.getId() %></td>
 												<td><%=item.getName() %></td>
 												<td><%=formattedPrice %></td>
-												<td><%=quantityOrdered %></td>
+												<td class="quantity-ordered"><%=quantityOrdered %></td>
+												<td class="order-delivery-address"><%=itemOrder.getDeliveryAddress() %></td>
 												<td><%= formattedTotal%></td>
 												<td><%if(itemOrder.getIsProcessed()){%>Yes<%}else{%>No<%} %></td>
-												<td class="text-align-sm-up-right"><button id="cancelOrderButton<%=itemOrder.getId()%>" class="btn btn-primary item-order-cancel-button" data-item-id = "<%=item.getId()%>" data-item-quantity-update = "<%=(availableItemQuantity + quantityOrdered)%>" data-item-order-id="<%=itemOrder.getId()%>" <%if(itemOrder.getIsProcessed()){%>disabled<%} %> data-toggle="modal" data-target="#orderCancelConfirmation">Cancel Order</button></td>
+												<td class="text-align-sm-up-right"><button id="editOrderButton<%=itemOrder.getId()%>" class="btn btn-primary item-order-edit-button" data-item-id = "<%=item.getId()%>" data-item-order-id="<%=itemOrder.getId()%>" <%if(itemOrder.getIsProcessed()){%>disabled<%} %> data-toggle="modal" data-target="#orderUpdateDialog">Edit</button></td>
+												<td class="text-align-sm-up-right"><button id="cancelOrderButton<%=itemOrder.getId()%>" class="btn btn-danger item-order-cancel-button" data-item-id = "<%=item.getId()%>" data-item-quantity-update = "<%=(availableItemQuantity + quantityOrdered)%>" data-item-order-id="<%=itemOrder.getId()%>" <%if(itemOrder.getIsProcessed()){%>disabled<%} %> data-toggle="modal" data-target="#orderCancelConfirmation">Cancel</button></td>
 											</tr>
 										<%}}%>
 								</tbody>
@@ -297,6 +326,33 @@
 								<input type="hidden" id="cancelOrderId" name="cancelOrderId"> 
 								<input type="hidden" id="cancelItemId" name="cancelItemId">
 								<input type="hidden" id="updatedItemQuantity" name="updatedItemQuantity">
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="orderUpdateDialog" class="modal fade" role="dialog">
+				<div class="modal-dialog modal-sm">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal">&times;</button>
+							<h4 class="modal-title">Update Order</h4>
+						</div>
+						<div class="modal-body">
+							<form id="orderUpdateForm" method="POST" action="ItemController">
+								<div class="form-group input-group">
+									<span class="input-group-addon"><i class="glyphicon glyphicon-plus"></i></span>
+									<input type="number" name="itemUpdateOrderQuantity" id="itemUpdateOrderQuantity" class="form-control" placeholder="Quantity" min="1" required>
+								</div>
+								<div class="form-group input-group">
+									<span class="input-group-addon"><i class="glyphicon glyphicon-home"></i></span>
+									<input type="text" name="itemUpdateOrderDeliveryAddress" id="itemUpdateOrderDeliveryAddress" class="form-control" placeholder="Delivery address" required>
+								</div>
+								<input type="hidden" name="isUpdateOrder" value="true">
+								<input type="hidden" id="itemUpdateOrderId" name="itemUpdateOrderId"> 
+								<div class="form-group">
+									<input type="submit" class="btn btn-info" value="Order">
+								</div>
 							</form>
 						</div>
 					</div>
