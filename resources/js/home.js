@@ -26,6 +26,11 @@ $(document).ready(function(){
 		    "emptyTable": "Currently you don't have any orders"}
 	});
 	
+	$('#manageOrdersTable').DataTable({
+		"language": {
+		    "emptyTable": "Currently there are no orders to manage"}
+	});
+	
 	
 	$('#managerLogInButton').click(function(){
 		$('#logInForm').find('#isUser').val("false");
@@ -77,12 +82,38 @@ $(document).ready(function(){
 		$('#itemUpdateOrderDeliveryAddress').val(address);
 	});
 	
+	
 	$('.item-delete-button').click(function(){
 		var itemId = $(this).attr('data-item-id');
 		$('#itemDeleteId').val(itemId);
 	});
 	
+	$('.item-edit-button').click(function(){
+		var itemId = $(this).attr('data-item-id');
+		var itemName = $(this).parent().parent().find('.item-name').text();
+		var itemPrice = $(this).attr('data-item-price');
+		var itemQuantity = $(this).parent().parent().find('.item-quantity').text();
+		
+		$('#itemUpdateId').val(itemId);
+		$('#itemUpdateName').val(itemName);
+		$('#itemUpdatePrice').val(itemPrice);
+		$('#itemUpdateQuantity').val(itemQuantity);
+	});
 	
+	$('.is-item-processed').on('change', function(){
+		var orderId = $(this).attr('data-order-id');
+		var isProcessed = $(this).prop('checked');
+		var data = {
+				id: orderId,
+				isProcessed: isProcessed
+		};
+		
+		$.ajax({
+			type: "POST",
+			url: "ItemController?isProcessingUpdate=true&isProcessed=" + isProcessed + "&orderId=" + orderId,
+			success: function(response){}
+		});
+	});
 	
 	$('#userChangePasswordForm').submit(function(event){
 		passwordCheck($('#userOldPassword').val().trim(), $('#userNewPassword').val().trim())

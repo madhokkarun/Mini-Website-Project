@@ -91,6 +91,43 @@ public class WebsiteDAO {
 	}
 	
 	/**
+	 * Get all the Item order records from database
+	 * @return: returns list of all the records in form of ItemOrder object
+	 * @throws SQLException
+	 */
+	public static List<ItemOrder> getItemOrders() throws SQLException
+	{
+		Connection conn = SqlServerConnection.getConnection();
+		
+		List<ItemOrder> itemOrderList = new ArrayList();
+		
+		PreparedStatement ps = conn.prepareStatement(WebsiteConstants.SELECT_ITEM_ORDER);
+		
+		ResultSet rs = ps.executeQuery();
+		
+		while(rs.next())
+		{
+			int index = 1;
+			
+			ItemOrder itemOrder = new ItemOrder();
+			
+			itemOrder.setId(rs.getInt(index++));
+			itemOrder.setUserAccount(rs.getInt(index++));
+			itemOrder.setItem(rs.getInt(index++));
+			itemOrder.setQuantity(rs.getInt(index++));
+			itemOrder.setOrderDate(rs.getString(index++));
+			itemOrder.setDeliveryAddress(rs.getString(index++));
+			itemOrder.setIsProcessed(rs.getBoolean(index++));
+			
+			itemOrderList.add(itemOrder);
+		}
+		
+		conn.close();
+		
+		return itemOrderList;
+	}
+	
+	/**
 	 * Get all the Item order records for a particular user from database
 	 * @return: returns list of all the records in form of ItemOrder object
 	 * @throws SQLException
@@ -544,7 +581,48 @@ public class WebsiteDAO {
 		
 	}
 	
+	public static Boolean updateItem(Item item, Integer quantity) throws SQLException
+	{
+		Connection conn = SqlServerConnection.getConnection();
+		
+		PreparedStatement ps = conn.prepareStatement(WebsiteConstants.UPDATE_ITEM);
+		
+		int index = 1;
+		
+		ps.setString(index++, item.getName());
+		ps.setDouble(index++, item.getPrice());
+		ps.setInt(index++, item.getId());
+		
+		int rowAffected = ps.executeUpdate();
+		
+		Boolean isInventoryUpdated = updateInventoryItemQuantity(quantity, item.getId());
+		
+		if(rowAffected == 1 && isInventoryUpdated)
+			return true;
+		else
+			return false;
+	}
 	
+	public static Boolean updateItemOrderProcessing(Boolean isProcessed, Integer orderId) throws SQLException
+	{
+		Connection conn = SqlServerConnection.getConnection();
+		
+		PreparedStatement ps = conn.prepareStatement(WebsiteConstants.UPDATE_ORDER_PROCESSING);
+		
+		int index = 1;
+		
+		ps.setBoolean(index++, isProcessed);
+		ps.setInt(index++, orderId);
+		
+		int rowAffected = ps.executeUpdate();
+		
+		conn.close();
+		
+		if(rowAffected == 1)
+			return true;
+		else
+			return false;
+	}
 	
 
 }

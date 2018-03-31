@@ -85,6 +85,19 @@
 				
 			}
 			
+			if(request.getSession().getAttribute("isItemUpdateSuccessful") != null)
+			{
+				if(Boolean.valueOf(String.valueOf(request.getSession().getAttribute("isItemUpdateSuccessful"))))
+				{%>
+					<div class="alert alert-success alert-dismissible">
+						<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+						<strong>Item Updated successfully!</strong>
+					</div>
+				<%}
+				
+				request.getSession().removeAttribute("isItemUpdateSuccessful");
+				
+			}
 			userFullName = " " + userAccount.getFirstName() + " " + userAccount.getLastName();
 			
 			%><script type="text/javascript"> oldSessionPassword = "<%=userAccount.getPassword()%>"</script>
@@ -104,7 +117,7 @@
 						<button class="btn btn-primary dropdown-toggle" id="managerDropdownButton" type="button" data-toggle="dropdown">Manager
 						<span class="caret"></span></button>
 						<ul class="dropdown-menu">
-							<li><a id="myOrdersButton" class="pointerClickable">Manage Orders</a></li>
+							<li><a id="myOrdersButton" class="pointerClickable" data-toggle="modal" data-target="#manageOrdersDialog">Manage Orders</a></li>
 							<li><a id="changePasswordButton" class="pointerClickable" data-toggle="modal" data-target="#managerChangePasswordDialog">Change Password</a></li>
 						</ul>
 					</div>
@@ -133,14 +146,15 @@
 							{for(Item item: WebsiteDAO.getItems())
 								{ %>
 									<tr>
-										<% String formattedPrice = "$" + String.format("%,.2f", item.getPrice());
+										<%  String onlyNumericPrice = String.format("%.2f", item.getPrice());
+											String formattedPrice = "$" + String.format("%,.2f", item.getPrice());
 											String quantity = WebsiteDAO.getItemQuantity(item.getId());
 										%>
 										<td><%=item.getId() %></td>
-										<td><%=item.getName() %></td>
-										<td><%=formattedPrice %></td>
-										<td><%=quantity %></td>
-										<td class="text-align-sm-up-right"><a class="pointerClickable item-edit-button" id="itemEditButton" data-item-id="<%=item.getId()%>"><span class="glyphicon glyphicon-pencil"></span></a></td>
+										<td class="item-name"><%=item.getName() %></td>
+										<td class="item-price"><%=formattedPrice %></td>
+										<td class="item-quantity"><%=quantity %></td>
+										<td class="text-align-sm-up-right"><a class="pointerClickable item-edit-button" id="itemEditButton" data-item-price="<%=onlyNumericPrice%>" data-item-id="<%=item.getId()%>" data-toggle="modal" data-target="#updateItemDialog"><span class="glyphicon glyphicon-pencil"></span></a></td>
 										<td class="text-align-sm-up-right"><a class="pointerClickable item-delete-button" id="itemDeleteButton" data-item-id="<%=item.getId()%>" data-toggle="modal" data-target="#itemDeleteConfirmation"><span class="glyphicon glyphicon-trash"></span></button></td>
 									</tr>
 								<%}}%>
@@ -176,6 +190,35 @@
 					</div>
 				</div>
 			</div>
+			<div id="updateItemDialog" class="modal fade" role="dialog">
+				<div class="modal-dialog modal-sm">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal">&times;</button>
+							<h4 class="modal-title">Add Item</h4>
+						</div>
+						<div class="modal-body">
+							<form id="updateItemForm" method="POST" action="ItemController">
+								<div class="form-group input-group">
+									<span class="input-group-addon"><i class="glyphicon glyphicon-pencil"></i></span>
+									<input type="text" name="itemUpdateName" id="itemUpdateName" class="form-control" placeholder="Name" required>
+								</div>
+								<div class="form-group input-group">
+									<span class="input-group-addon"><i class="glyphicon glyphicon-usd"></i></span>
+									<input type="number" name="itemUpdatePrice" id="itemUpdatePrice" class="form-control" placeholder="Price" step=".01" required>
+								</div>
+								<div class="form-group input-group">
+									<span class="input-group-addon"><i class="glyphicon glyphicon-plus"></i></span>
+									<input type="number" name="itemUpdateQuantity" id="itemUpdateQuantity" class="form-control" placeholder="Quantity" min="0" required>
+								</div>
+								<input type="hidden" name="isUpdateItem" value="true">
+								<input type="hidden" name="itemUpdateId" id="itemUpdateId">
+								<input type="submit" class="btn btn-info" value="Update">
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
 			<div id="itemDeleteConfirmation" class="modal fade" role="dialog">
 				<div class="modal-dialog modal-sm">
 					<div class="modal-content">
@@ -197,6 +240,59 @@
 								<input type="hidden" name="isDeleteItem" value="true">
 								<input type="hidden" id="itemDeleteId" name="itemDeleteId"> 
 							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="manageOrdersDialog" class="modal fade" role="dialog">
+				<div class="modal-dialog modal-lg">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal">&times;</button>
+							<h4 class="modal-title">My Orders</h4>
+						</div>
+						<div class="modal-body">
+							<table id="manageOrdersTable" class="table manage-orders-table">
+								<thead>
+									<tr>
+										<th>Order No</th>
+										<th>Name</th>
+										<th>Price</th>
+										<th>Quantity</th>
+										<th>Address</th>
+										<th>Total</th>
+										<th>Is Processed?</th>
+									</tr>
+								</thead>
+								<tbody>
+								
+									<%if(userAccount != null)
+										{
+										for(ItemOrder itemOrder: WebsiteDAO.getItemOrders())
+										{ %>
+											<tr>
+												<% Item item = WebsiteDAO.getItem(itemOrder.getItem());
+												
+													String formattedPrice = "$" + String.format("%,.2f", item.getPrice());
+													Integer quantityOrdered = itemOrder.getQuantity();
+													
+													Double total = Double.valueOf(item.getPrice()) * quantityOrdered;
+													String formattedTotal = "$" + String.format("%,.2f", total);
+													
+													Integer availableItemQuantity = Integer.valueOf(WebsiteDAO.getItemQuantity(item.getId()));
+													
+												%>
+												<td><%=itemOrder.getId() %></td>
+												<td><%=item.getName() %></td>
+												<td><%=formattedPrice %></td>
+												<td class="quantity-ordered"><%=quantityOrdered %></td>
+												<td class="order-delivery-address"><%=itemOrder.getDeliveryAddress() %></td>
+												<td><%= formattedTotal%></td>
+												<td><input type="checkbox" class="is-item-processed" data-order-id = "<%=itemOrder.getId()%>" <%if(itemOrder.getIsProcessed()){%> checked<%} %>></td>
+											</tr>
+										<%}}%>
+								</tbody>
+							</table>
 						</div>
 					</div>
 				</div>

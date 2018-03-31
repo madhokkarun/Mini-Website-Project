@@ -9,6 +9,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
 import DAO.WebsiteDAO;
 import model.Item;
 import model.ItemOrder;
@@ -39,6 +43,8 @@ public class ItemController extends HttpServlet {
 		Boolean isUpdateOrder = Boolean.valueOf(request.getParameter("isUpdateOrder"));
 		Boolean isItemAdd = Boolean.valueOf(request.getParameter("isAddItem"));
 		Boolean isItemDelete = Boolean.valueOf(request.getParameter("isDeleteItem"));
+		Boolean isItemUpdate = Boolean.valueOf(request.getParameter("isUpdateItem"));
+		Boolean isItemProcessingUpdate = Boolean.valueOf(request.getParameter("isProcessingUpdate"));
 		
 		UserAccount userAccount =  (UserAccount) request.getSession().getAttribute("userAccount");
 		
@@ -85,6 +91,24 @@ public class ItemController extends HttpServlet {
 			try {
 				handleItemDelete(request, response);
 			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		else if(isItemUpdate)
+		{
+			try {
+				handleItemUpdate(request, response);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		else if(isItemProcessingUpdate)
+		{
+			try {
+				handleItemProcessing(request, response);
+			} catch (ParseException | SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -203,6 +227,39 @@ public class ItemController extends HttpServlet {
 		
 		response.sendRedirect("/inventory/managerHome.jsp");
 				
+	}
+	
+	protected void handleItemUpdate(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException
+	{
+		Integer itemId = Integer.valueOf(request.getParameter("itemUpdateId"));
+		String itemName = request.getParameter("itemUpdateName");
+		Integer itemQuantity = Integer.valueOf(request.getParameter("itemUpdateQuantity"));
+		Double itemPrice = Double.valueOf(request.getParameter("itemUpdatePrice"));
+		
+		Item item = new Item();
+		
+		item.setId(itemId);
+		item.setName(itemName);
+		item.setPrice(itemPrice);
+		
+		Boolean isItemUpdateSuccessful = WebsiteDAO.updateItem(item, itemQuantity);
+		
+		if(isItemUpdateSuccessful)
+			request.getSession().setAttribute("isItemUpdateSuccessful", isItemUpdateSuccessful);
+		
+		response.sendRedirect("/inventory/managerHome.jsp");
+		
+	}
+	
+	protected void handleItemProcessing(HttpServletRequest request, HttpServletResponse response) throws ParseException, SQLException
+	{
+		
+		
+		Integer orderId = Integer.valueOf(request.getParameter("orderId"));
+		Boolean isProcessed= Boolean.valueOf(request.getParameter("isProcessed"));
+		
+		WebsiteDAO.updateItemOrderProcessing(isProcessed, orderId);
+		
 	}
 
 }

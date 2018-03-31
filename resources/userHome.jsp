@@ -351,7 +351,7 @@
 								<input type="hidden" name="isUpdateOrder" value="true">
 								<input type="hidden" id="itemUpdateOrderId" name="itemUpdateOrderId"> 
 								<div class="form-group">
-									<input type="submit" class="btn btn-info" value="Order">
+									<input type="submit" class="btn btn-info" value="Update">
 								</div>
 							</form>
 						</div>
