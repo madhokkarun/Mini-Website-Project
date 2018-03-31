@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import DAO.WebsiteDAO;
+import model.Item;
 import model.ItemOrder;
 import model.UserAccount;
 
@@ -36,6 +37,8 @@ public class ItemController extends HttpServlet {
 		Boolean isItemOrder = Boolean.valueOf(request.getParameter("isItemOrder"));
 		Boolean isCancelOrder = Boolean.valueOf(request.getParameter("isCancelOrder"));
 		Boolean isUpdateOrder = Boolean.valueOf(request.getParameter("isUpdateOrder"));
+		Boolean isItemAdd = Boolean.valueOf(request.getParameter("isAddItem"));
+		Boolean isItemDelete = Boolean.valueOf(request.getParameter("isDeleteItem"));
 		
 		UserAccount userAccount =  (UserAccount) request.getSession().getAttribute("userAccount");
 		
@@ -68,8 +71,25 @@ public class ItemController extends HttpServlet {
 				e.printStackTrace();
 			}
 		}
+		else if(isItemAdd)
+		{
+			try {
+				handleItemAdd(request, response);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		else if(isItemDelete)
+		{
+			try {
+				handleItemDelete(request, response);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 			
-		
 	}
 
 	/**
@@ -150,6 +170,39 @@ public class ItemController extends HttpServlet {
 		response.sendRedirect("/inventory/userHome.jsp");
 		
 		
+	}
+	
+	protected void handleItemAdd(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException
+	{
+		String itemName = request.getParameter("itemAddName");
+		Integer itemQuantity = Integer.valueOf(request.getParameter("itemAddQuantity"));
+		Double itemPrice = Double.valueOf(request.getParameter("itemAddPrice"));
+		
+		Item item = new Item();
+		
+		item.setName(itemName);
+		item.setPrice(itemPrice);
+		
+		Boolean isItemAddSuccessful = WebsiteDAO.insertItem(item, itemQuantity);
+		
+		if(isItemAddSuccessful)
+			request.getSession().setAttribute("isItemAddSuccessful", isItemAddSuccessful);
+		
+		response.sendRedirect("/inventory/managerHome.jsp");
+		
+	}
+	
+	protected void handleItemDelete(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException
+	{
+		Integer itemId = Integer.valueOf(request.getParameter("itemDeleteId"));
+		
+		Boolean isItemDeleteSuccessful = WebsiteDAO.deleteItem(itemId);
+		
+		if(isItemDeleteSuccessful)
+			request.getSession().setAttribute("isItemDeleteSuccessful", isItemDeleteSuccessful);
+		
+		response.sendRedirect("/inventory/managerHome.jsp");
+				
 	}
 
 }

@@ -77,6 +77,11 @@ $(document).ready(function(){
 		$('#itemUpdateOrderDeliveryAddress').val(address);
 	});
 	
+	$('.item-delete-button').click(function(){
+		var itemId = $(this).attr('data-item-id');
+		$('#itemDeleteId').val(itemId);
+	});
+	
 	
 	
 	$('#userChangePasswordForm').submit(function(event){

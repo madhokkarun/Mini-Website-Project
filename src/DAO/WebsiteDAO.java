@@ -477,6 +477,74 @@ public class WebsiteDAO {
 		
 	}
 	
+	public static Boolean insertItem(Item item, Integer quantity) throws SQLException
+	{
+		Connection conn = SqlServerConnection.getConnection();
+		
+		PreparedStatement ps = conn.prepareStatement(WebsiteConstants.ADD_ITEM);
+		
+		int index = 1;
+		
+		ps.setString(index++, item.getName());
+		ps.setDouble(index++, item.getPrice());
+		
+		ResultSet rs = ps.executeQuery();
+		
+		int itemId = 0;
+		
+		while(rs.next())
+			itemId = rs.getInt(1);
+		
+		ps = conn.prepareStatement(WebsiteConstants.ADD_QUANTITY_INVENTORY);
+		
+		index = 1;
+		
+		ps.setInt(index++, itemId);
+		ps.setInt(index++, quantity);
+		
+		int rowAffected = ps.executeUpdate();
+		
+		conn.close();
+		
+		if(rowAffected > 0 && itemId > 0)
+			return true;
+		else
+			return false;
+	} 
+	
+	public static Boolean deleteItem(Integer itemId) throws SQLException
+	{
+		Connection conn = SqlServerConnection.getConnection();
+		
+		PreparedStatement ps = conn.prepareStatement(WebsiteConstants.DELETE_ITEM_INVENTORY);
+		
+		int index = 1;
+		ps.setInt(index, itemId);
+		int inventoryRowAffected = ps.executeUpdate();
+		
+		
+		ps = conn.prepareStatement(WebsiteConstants.DELETE_ITEM_ORDER_ITEM);
+		
+		index = 1;
+		ps.setInt(index, itemId);
+		int itemOrderRowAffected = ps.executeUpdate();
+		
+		ps = conn.prepareStatement(WebsiteConstants.DELETE_ITEM);
+		
+		index = 1;
+		
+		ps.setInt(index++, itemId);
+		
+		int itemRowAffected = ps.executeUpdate();
+		
+		if(itemRowAffected == 1 && inventoryRowAffected == 1 || itemOrderRowAffected > 0)
+			return true;
+		else
+			return false;
+		
+	}
+	
+	
 	
 
 }

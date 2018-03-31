@@ -21,6 +21,14 @@ public class WebsiteConstants {
 	public static final String UPDATE_INVENTORY_ITEM_QUANTITY = "UPDATE inventory SET quantity = ? WHERE item = ?";
 	
 	public static final String DELETE_ITEM_ORDER = "DELETE FROM itemOrder where id = ?";
+	public static final String DELETE_ITEM_ORDER_ITEM = "DELETE FROM itemOrder where item = ?";
+	
 	public static final String UPDATE_ITEM_ORDER = "UPDATE itemOrder SET quantity = ?, deliveryAddress = ? WHERE id = ?";
 	public static final String SELECT_ITEM_ORDER_ID = "SELECT * FROM itemOrder where id = ?";
+	
+	public static final String ADD_ITEM = "INSERT INTO item(name, price) OUTPUT INSERTED.id values (?,?)";
+	public static final String ADD_QUANTITY_INVENTORY = "INSERT INTO inventory(item, quantity) values(?,?)";
+	
+	public static final String DELETE_ITEM = "DELETE FROM item WHERE id = ?";
+	public static final String DELETE_ITEM_INVENTORY = "DELETE FROM inventory WHERE item = ?";
 }

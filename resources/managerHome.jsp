@@ -31,22 +31,6 @@
 		UserAccount userAccount = (UserAccount) request.getSession().getAttribute("userAccount");
 		String userFullName = "";
 		
-		if(request.getSession().getAttribute("isPasswordChangeSuccessful") != null)
-		{
-			if(Boolean.valueOf(String.valueOf(request.getSession().getAttribute("isPasswordChangeSuccessful"))))
-			{%>
-				<div class="alert alert-success alert-dismissible">
-					<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-					<strong>Password changed successfully!</strong>
-				</div>
-			<%}
-			
-			request.getSession().removeAttribute("isPasswordChangeSuccessful");
-			
-			%>
-			<script>oldSessionPassword = "";</script>
-			<%
-		}
 		
 		if(userAccount != null)
 		{
@@ -54,6 +38,51 @@
 			{
 				request.getSession().removeAttribute("userAccount");
 				response.sendRedirect("/inventory");
+			}
+			
+			if(request.getSession().getAttribute("isPasswordChangeSuccessful") != null)
+			{
+				if(Boolean.valueOf(String.valueOf(request.getSession().getAttribute("isPasswordChangeSuccessful"))))
+				{%>
+					<div class="alert alert-success alert-dismissible">
+						<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+						<strong>Password changed successfully!</strong>
+					</div>
+				<%}
+				
+				request.getSession().removeAttribute("isPasswordChangeSuccessful");
+				
+				%>
+				<script>oldSessionPassword = "";</script>
+				<%
+			}
+			
+			if(request.getSession().getAttribute("isItemAddSuccessful") != null)
+			{
+				if(Boolean.valueOf(String.valueOf(request.getSession().getAttribute("isItemAddSuccessful"))))
+				{%>
+					<div class="alert alert-success alert-dismissible">
+						<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+						<strong>Item Added successfully!</strong>
+					</div>
+				<%}
+				
+				request.getSession().removeAttribute("isItemAddSuccessful");
+				
+			}
+			
+			if(request.getSession().getAttribute("isItemDeleteSuccessful") != null)
+			{
+				if(Boolean.valueOf(String.valueOf(request.getSession().getAttribute("isItemDeleteSuccessful"))))
+				{%>
+					<div class="alert alert-success alert-dismissible">
+						<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+						<strong>Item Deleted successfully!</strong>
+					</div>
+				<%}
+				
+				request.getSession().removeAttribute("isItemDeleteSuccessful");
+				
 			}
 			
 			userFullName = " " + userAccount.getFirstName() + " " + userAccount.getLastName();
@@ -70,6 +99,7 @@
 					<h3 class="display-sm-up-inline-block">Inventory - </h3><h4 class="display-sm-up-inline-block padding-left-sm-up-5"><%=userFullName %></h4>
 				</div>
 				<div class="col-sm-6 col-md-6 col-lg-6 inventory-page-header-buttons padding-top-sm-up-15 text-align-sm-up-right">
+					<button class="btn btn-primary" id="addItemButton" type="button" data-target="#addItemDialog" data-toggle="modal">Add Item</button>
 					<div class="dropdown manager-dropdown display-sm-up-inline-block">
 						<button class="btn btn-primary dropdown-toggle" id="managerDropdownButton" type="button" data-toggle="dropdown">Manager
 						<span class="caret"></span></button>
@@ -110,35 +140,62 @@
 										<td><%=item.getName() %></td>
 										<td><%=formattedPrice %></td>
 										<td><%=quantity %></td>
-										<td class="text-align-sm-up-right"><a class="pointerClickable" id="itemEditButton" data-item-id="<%=item.getId()%>"><span class="glyphicon glyphicon-pencil"></span></a></td>
-										<td class="text-align-sm-up-right"><a class="pointerClickable" id="itemDeleteButton" data-item-id="<%=item.getId()%>"><span class="glyphicon glyphicon-trash"></span></button></td>
+										<td class="text-align-sm-up-right"><a class="pointerClickable item-edit-button" id="itemEditButton" data-item-id="<%=item.getId()%>"><span class="glyphicon glyphicon-pencil"></span></a></td>
+										<td class="text-align-sm-up-right"><a class="pointerClickable item-delete-button" id="itemDeleteButton" data-item-id="<%=item.getId()%>" data-toggle="modal" data-target="#itemDeleteConfirmation"><span class="glyphicon glyphicon-trash"></span></button></td>
 									</tr>
 								<%}}%>
 						</tbody>
 					</table>
 				</div>
 			</div>
-			<div id="managerChangePasswordDialog" class="modal fade" role="dialog">
+			<div id="addItemDialog" class="modal fade" role="dialog">
 				<div class="modal-dialog modal-sm">
 					<div class="modal-content">
 						<div class="modal-header">
 							<button type="button" class="close" data-dismiss="modal">&times;</button>
-							<h4 class="modal-title">Change Password</h4>
+							<h4 class="modal-title">Add Item</h4>
 						</div>
 						<div class="modal-body">
-							<form id="managerChangePasswordForm" method="POST" action="WebsiteController">
+							<form id="addItemForm" method="POST" action="ItemController">
 								<div class="form-group input-group">
-									<span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
-									<input type="password" name="managerOldPassword" id="managerOldPassword" class="form-control" placeholder="Old Password" required>
+									<span class="input-group-addon"><i class="glyphicon glyphicon-pencil"></i></span>
+									<input type="text" name="itemAddName" id="itemAddName" class="form-control" placeholder="Name" required>
 								</div>
 								<div class="form-group input-group">
-									<span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
-									<input type="password" name="managerNewPassword" id="managerNewPassword" class="form-control" placeholder="New Password" min="8" pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$" title="Min 8 characters, at least one letter and one number" required>
+									<span class="input-group-addon"><i class="glyphicon glyphicon-usd"></i></span>
+									<input type="number" name="itemAddPrice" id="itemAddPrice" class="form-control" placeholder="Price" step=".01" required>
 								</div>
-								<input type="hidden" name="isChangePassword" value="true">
+								<div class="form-group input-group">
+									<span class="input-group-addon"><i class="glyphicon glyphicon-plus"></i></span>
+									<input type="number" name="itemAddQuantity" id="itemAddQuantity" class="form-control" placeholder="Quantity" min="0" required>
+								</div>
+								<input type="hidden" name="isAddItem" value="true">
+								<input type="submit" class="btn btn-info" value="Add">
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="itemDeleteConfirmation" class="modal fade" role="dialog">
+				<div class="modal-dialog modal-sm">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal">&times;</button>
+							<h4 class="modal-title">Delete Order</h4>
+						</div>
+						<div class="modal-body">
+							<form id="itemDeleteForm" method="POST" action="ItemController">
 								<div class="form-group">
-									<input type="submit" class="btn btn-info" value="Change">
+									<span>Are you sure you want to delete this item?</label>
 								</div>
+								<div class="form-group display-sm-up-inline-block">
+									<input type="submit" class="btn" value="Yes">
+								</div>
+								<div class="form-group display-sm-up-inline-block">
+									<button class="btn btn-info" data-dismiss="modal">No</button>
+								</div>
+								<input type="hidden" name="isDeleteItem" value="true">
+								<input type="hidden" id="itemDeleteId" name="itemDeleteId"> 
 							</form>
 						</div>
 					</div>
